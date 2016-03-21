@@ -8,7 +8,7 @@ aglais is an implementation of the [io language](https://github.com/stevedekorte
 However, this is not a direct translation. I am also using this opportunity to learn Go, as well as compiler design.
 
 ##Installation
-`go get github.com/mitchell-riley/aglais/cmd`
+`go get github.com/mitchell-riley/aglais`
 
 ##Thanks
 Jonathan Boyett for his inspiring [europa](https://github.com/saysjonathan/europa), a project sharing a similar objective to mine.
