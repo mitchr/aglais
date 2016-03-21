@@ -1,9 +1,9 @@
 package main
 
 import (
-	"aglais"
 	"fmt"
 	"io/ioutil"
+	"lexer"
 	"os"
 )
 
@@ -14,7 +14,7 @@ func main() {
 		panic("file not found")
 	}
 
-	for m := range aglais.Lex(string(b)).Tokens {
+	for m := range lexer.Lex(string(b)).Tokens {
 		fmt.Println(m)
 	}
 }

@@ -1,4 +1,4 @@
-package aglais
+package lexer
 
 import (
 	"fmt"
