@@ -2,7 +2,6 @@ package lexer
 
 import (
 	"fmt"
-	"strconv"
 	"unicode"
 )
 
@@ -173,13 +172,17 @@ func lexAny(l *Lexer) stateFn {
 	panic(fmt.Sprintf("Don't know what went wrong!\nlast rune scanned: %s\nposition:%v", string(l.input[l.position]), l.input[l.start:l.position]))
 }
 
+// has already captured the first character
 func lexIdentifier(l *Lexer) stateFn {
 	for {
 		switch r := l.next(); {
 		case !isAlphaNumeric(r):
-			if _, err := strconv.Atoi(l.input[l.start:l.position]); err == nil {
-				l.push(Decimal)
-				return lexAny
+			//this is a bottleneck; find a way to to this faster
+			//iterate over current lexeme and check if it contains any characters that aren't numbers
+			for i := range l.input[l.start:l.position] {
+				if !isDecChar(rune(i)) {
+					return lexDecimal
+				}
 			}
 			l.backup()
 			l.push(Identifier)
@@ -243,6 +246,8 @@ func lexHex(l *Lexer) stateFn {
 }
 
 func lexDecimal(l *Lexer) stateFn {
+	for ; isDecChar(l.peek()); l.next() {
+	}
 	l.push(Decimal)
 	return lexAny
 }
@@ -269,4 +274,8 @@ func isWhitespace(c rune) bool {
 
 func isHexChar(c rune) bool {
 	return c == 'a' || c == 'b' || c == 'c' || c == 'd' || c == 'e' || unicode.IsDigit(c)
+}
+
+func isDecChar(c rune) bool {
+	return unicode.IsDigit(c) || c == 'e' || c == '.' || c == '-'
 }
