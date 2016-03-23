@@ -179,14 +179,21 @@ func lexIdentifier(l *Lexer) stateFn {
 		case !isAlphaNumeric(r):
 			//this is a bottleneck; find a way to to this faster
 			//iterate over current lexeme and check if it contains any characters that aren't numbers
-			for i := range l.input[l.start:l.position] {
-				if !isDecChar(rune(i)) {
-					return lexDecimal
+			b := make([]bool, 0)
+			for _, v := range l.input[l.start:l.position] {
+				if isDecChar(v) {
+					b = append(b, true)
+				} else {
+					b = append(b, false)
 				}
 			}
-			l.backup()
-			l.push(Identifier)
-			return lexAny
+			for _, v := range b {
+				if v == false {
+					l.push(Identifier)
+					return lexAny
+				}
+			}
+			return lexDecimal
 		}
 	}
 }
