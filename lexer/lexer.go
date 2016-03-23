@@ -114,9 +114,9 @@ func lexAny(l *Lexer) stateFn {
 		}
 		l.push(Operator)
 		return lexAny
-	case r == '"':
+	case r == '"', r == '\'':
 		//advance until another '"' is found
-		for ; l.peek() == '"'; l.next() {
+		for ; l.peek() == '"' || l.peek() == '\''; l.next() {
 		}
 		return lexQuote
 	//this is ugly, but practical
@@ -198,7 +198,6 @@ func lexIdentifier(l *Lexer) stateFn {
 	}
 }
 
-//we want to capture the inside string, but currently are not doing that
 func lexQuote(l *Lexer) stateFn {
 	for {
 		switch r := l.next(); {
@@ -207,7 +206,11 @@ func lexQuote(l *Lexer) stateFn {
 				l.push(TriQuote)
 				return lexAny
 			}
-			l.backup()
+			//should we be backing up here?
+			// l.backup()
+			l.push(MonoQuote)
+			return lexAny
+		case r == '\'':
 			l.push(MonoQuote)
 			return lexAny
 		}
@@ -263,12 +266,11 @@ func isAlphaNumeric(c rune) bool {
 	return unicode.IsDigit(c) || unicode.IsLetter(c) || c == '_'
 }
 
-// can this be simplified somehow?
 // '/' is an operator and the symbol for a comment; handle that here currently commented out
-// or maybe we should leave that kind of decision to the parser?
 func isOperator(c rune) bool {
 	// c == '/'
-	return c == ':' || c == '.' || c == '\'' || c == '~' || c == '!' || c == '@' || c == '$' || c == '%' || c == '^' || c == '&' || c == '*' || c == '-' || c == '+' || c == '=' || c == '{' || c == '}' || c == '[' || c == ']' || c == '|' || c == '\\' || c == '<' || c == '>' || c == '?'
+	// c == '\''
+	return c == ':' || c == '.' || c == '~' || c == '!' || c == '@' || c == '$' || c == '%' || c == '^' || c == '&' || c == '*' || c == '-' || c == '+' || c == '=' || c == '{' || c == '}' || c == '[' || c == ']' || c == '|' || c == '\\' || c == '<' || c == '>' || c == '?'
 }
 
 func isSeparator(c rune) bool {
