@@ -90,7 +90,7 @@ func Lex(input string) *Lexer {
 	go func() {
 		for ; l.state != nil; l.state = l.state(l) {
 		}
-		close(l.Tokens)
+		defer close(l.Tokens)
 	}()
 
 	return l
@@ -177,11 +177,16 @@ func lexIdentifier(l *Lexer) stateFn {
 	for {
 		switch r := l.next(); {
 		case !isAlphaNumeric(r):
-			//this is a bottleneck; find a way to to this faster
+			if isWhitespace(r) {
+				l.backup()
+				l.push(Identifier)
+				return lexAny
+			}
+			//this is a bottleneck; find a way to make this faster
 			//iterate over current lexeme and check if it contains any characters that aren't numbers
-			b := make([]bool, 0)
+			var b []bool
 			for _, v := range l.input[l.start:l.position] {
-				if isDecChar(v) {
+				if isDecChar(v) || isHexChar(v) {
 					b = append(b, true)
 				} else {
 					b = append(b, false)
@@ -194,6 +199,10 @@ func lexIdentifier(l *Lexer) stateFn {
 				}
 			}
 			return lexDecimal
+		case r == eof:
+			//push whatever we have before exiting
+			l.push(Identifier)
+			return nil
 		}
 	}
 }
@@ -207,6 +216,7 @@ func lexQuote(l *Lexer) stateFn {
 				return lexAny
 			}
 			//should we be backing up here?
+			// l.backup()
 			// l.backup()
 			l.push(MonoQuote)
 			return lexAny
