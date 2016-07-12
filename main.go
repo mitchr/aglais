@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/Mitchell-Riley/aglais/lexer"
+	"github.com/Mitchell-Riley/aglais/parser"
 	"io/ioutil"
 	"os"
 )
@@ -17,4 +18,7 @@ func main() {
 	for m := range lexer.Lex(string(b)).Tokens {
 		fmt.Println(m)
 	}
+
+	parser.Parse(lexer.Lex(string(b)))
+
 }
