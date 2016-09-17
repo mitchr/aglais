@@ -1,6 +1,5 @@
 # aglais
 [![Build Status](https://travis-ci.org/Mitchell-Riley/aglais.svg?branch=master)](https://travis-ci.org/Mitchell-Riley/aglais)
-![aglais butterfly](http://butterfly-conservation.org/files/peacock-upperwing1_matt-berry-web.jpg)
 
 ## About
 aglais is an implementation of the [io language](https://github.com/stevedekorte/io) in Go. I started this because as I was fooling around with the original language implementation, I wanted to make my own changes. Here's the problem: it's written in C. I hate C. Go is much nicer. 
