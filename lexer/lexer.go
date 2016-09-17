@@ -37,7 +37,7 @@ type Token struct {
 }
 
 type Lexer struct {
-	Tokens chan Token
+	Tokens []Token
 
 	state    stateFn
 	input    string
@@ -49,7 +49,7 @@ type stateFn func(*Lexer) stateFn
 
 // Pushes a Token onto the Tokens channel
 func (l *Lexer) push(t TokenType) {
-	l.Tokens <- Token{t, l.input[l.start:l.position]}
+	l.Tokens = append(l.Tokens, Token{t, string(l.input[l.start:l.position])})
 	l.start = l.position
 }
 
@@ -82,16 +82,13 @@ func (l *Lexer) backup() {
 
 func Lex(input string) *Lexer {
 	l := &Lexer{
-		Tokens: make(chan Token),
-		state:  lexAny,
-		input:  input,
+		state: lexAny,
+		input: input,
 	}
 
-	go func() {
-		for ; l.state != nil; l.state = l.state(l) {
-		}
-		defer close(l.Tokens)
-	}()
+	for l.state != nil {
+		l.state = l.state(l)
+	}
 
 	return l
 }
@@ -166,7 +163,6 @@ func lexAny(l *Lexer) stateFn {
 		// fmt.Println("EOF reached!")
 		return nil
 	default:
-		defer close(l.Tokens)
 		panic(fmt.Sprintf("Unrecognized character: %s\n", string(r)))
 	}
 	panic(fmt.Sprintf("Don't know what went wrong!\nlast rune scanned: %s\nposition:%v", string(l.input[l.position]), l.input[l.start:l.position]))
