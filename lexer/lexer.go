@@ -40,7 +40,7 @@ type Lexer struct {
 	Tokens []Token
 
 	state    stateFn
-	input    string
+	input    []byte
 	start    int
 	position int
 }
@@ -80,7 +80,7 @@ func (l *Lexer) backup() {
 	l.position--
 }
 
-func Lex(input string) *Lexer {
+func Lex(input []byte) *Lexer {
 	l := &Lexer{
 		state: lexAny,
 		input: input,
