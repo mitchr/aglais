@@ -2,9 +2,10 @@ package parser
 
 import (
 	"fmt"
-	"github.com/Mitchell-Riley/aglais/lexer"
 	"io/ioutil"
 	"testing"
+
+	"github.com/Mitchell-Riley/aglais/lexer"
 )
 
 func TestParseFile(t *testing.T) {
@@ -14,7 +15,5 @@ func TestParseFile(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	fmt.Println(Parse(lexer.Lex(string(b))).Buff)
-
-	// fmt.Printf("%#v\n",
+	fmt.Println(Parse(lexer.Lex(b)))
 }
