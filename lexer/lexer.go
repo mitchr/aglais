@@ -193,8 +193,7 @@ func lexQuote(l *Lexer) stateFn {
 				return lexAny
 			}
 			//should we be backing up here?
-			// l.backup()
-			// l.backup()
+			l.backup()
 			l.push(MonoQuote)
 			return lexAny
 		case r == '\'':
