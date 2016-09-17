@@ -174,37 +174,18 @@ func lexAny(l *Lexer) stateFn {
 
 // has already captured the first character
 func lexIdentifier(l *Lexer) stateFn {
-	for {
-		switch r := l.next(); {
-		case !isAlphaNumeric(r):
-			if isWhitespace(r) {
-				l.backup()
-				l.push(Identifier)
-				return lexAny
-			}
-			//this is a bottleneck; find a way to make this faster
-			//iterate over current lexeme and check if it contains any characters that aren't numbers
-			var b []bool
-			for _, v := range l.input[l.start:l.position] {
-				if isDecChar(v) || isHexChar(v) {
-					b = append(b, true)
-				} else {
-					b = append(b, false)
-				}
-			}
-			for _, v := range b {
-				if v == false {
-					l.push(Identifier)
-					return lexAny
-				}
-			}
-			return lexDecimal
-		case r == eof:
-			//push whatever we have before exiting
+	for isAlphaNumeric(l.peek()) {
+		l.next()
+	}
+
+	for _, v := range l.input[l.start:l.position] {
+		// if it's not a decimal character, then it must be an identifier
+		if !isDecChar(rune(v)) {
 			l.push(Identifier)
-			return nil
+			return lexAny
 		}
 	}
+	return lexDecimal
 }
 
 func lexQuote(l *Lexer) stateFn {
