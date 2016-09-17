@@ -292,7 +292,7 @@ func isWhitespace(c rune) bool {
 }
 
 func isHexChar(c rune) bool {
-	return c == 'a' || c == 'b' || c == 'c' || c == 'd' || c == 'e' || unicode.IsDigit(c)
+	return c == 'a' || c == 'b' || c == 'c' || c == 'd' || c == 'e' || c == 'f' || unicode.IsDigit(c)
 }
 
 func isDecChar(c rune) bool {
