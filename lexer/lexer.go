@@ -101,8 +101,8 @@ func Lex(input string) *Lexer {
 func lexAny(l *Lexer) stateFn {
 	switch r := l.next(); {
 	case isAlphaNumeric(r):
-		//check for hexcharacters
-		if p := l.next(); (p == 'x' || p == 'X') && isHexChar(l.next()) {
+		// check for hexcharacters
+		if p := l.next(); (r == '0' && (p == 'x' || p == 'X')) && isHexChar(l.peek()) {
 			return lexHex
 		}
 		l.backup()
@@ -259,7 +259,8 @@ func lexStarComment(l *Lexer) stateFn {
 }
 
 func lexHex(l *Lexer) stateFn {
-	for ; isHexChar(l.peek()); l.next() {
+	for isHexChar(l.peek()) {
+		l.next()
 	}
 	l.push(HexNumber)
 	return lexAny
