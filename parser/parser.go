@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+
 	"github.com/Mitchell-Riley/aglais/lexer"
 )
 
@@ -28,17 +29,23 @@ type tree struct {
 }
 
 type Parser struct {
-	Tokens chan lexer.Token
+	Tokens []lexer.Token
 
-	current lexer.Token
-	Buff    []Node // unexport this when finished debugging
-	state   stateFn
+	current  lexer.Token
+	position int
+	Buff     []Node // unexport this when finished debugging
+	state    stateFn
 }
 
 type stateFn func(*Parser) stateFn
 
 func (p *Parser) next() lexer.Token {
-	p.current = <-p.Tokens
+	if p.position == len(p.Tokens) {
+		return lexer.Token{Type: -1}
+	}
+
+	p.current = p.Tokens[p.position:][0]
+	p.position++
 	return p.current
 }
 
@@ -47,18 +54,17 @@ func (p *Parser) push(t TokenType) {
 }
 
 func Parse(l *lexer.Lexer) *Parser {
-	tok := <-l.Tokens
-
 	p := &Parser{
-		Tokens:  l.Tokens,
-		current: tok,
-		state:   parseAny,
+		Tokens: l.Tokens,
+		// start with the first token
+		current:  l.Tokens[0],
+		position: 1,
+		state:    parseAny,
 	}
 
-	// go func() {
-	for ; p.state != nil; p.state = p.state(p) {
+	for p.state != nil {
+		p.state = p.state(p)
 	}
-	// }()
 
 	return p
 }
