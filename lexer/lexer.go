@@ -8,8 +8,6 @@ import (
 type TokenType int
 
 //go:generate stringer -type=TokenType
-// calling a print func on a struct calls the print func on all of it's
-// fields; cool
 const (
 	Identifier TokenType = iota
 
@@ -112,11 +110,11 @@ func lexAny(l *Lexer) stateFn {
 		l.push(Operator)
 		return lexAny
 	case r == '"', r == '\'':
-		//advance until another '"' is found
+		// advance until another '"' is found
 		for ; l.peek() == '"' || l.peek() == '\''; l.next() {
 		}
 		return lexQuote
-	//this is ugly, but practical
+	// this is ugly
 	case isSeparator(r), r == '\r', r == '\n':
 		if r == '\n' {
 			l.push(Terminator)
@@ -188,6 +186,7 @@ func lexQuote(l *Lexer) stateFn {
 	for {
 		switch r := l.next(); {
 		case r == '"':
+			// check for TriQuote
 			if l.next() == '"' && l.next() == '"' {
 				l.push(TriQuote)
 				return lexAny
@@ -207,12 +206,12 @@ func lexQuote(l *Lexer) stateFn {
 	}
 }
 
-//terminator is included in the Comment token
+// terminator is included in the Comment token
 func lexComment(l *Lexer) stateFn {
 	for {
 		switch l.next() {
 		case eof:
-			//push whatever we have before exiting
+			// push whatever we have before exiting
 			l.push(Comment)
 			return nil
 		case '\n':
@@ -243,7 +242,8 @@ func lexHex(l *Lexer) stateFn {
 }
 
 func lexDecimal(l *Lexer) stateFn {
-	for ; isDecChar(l.peek()); l.next() {
+	for isDecChar(l.peek()) {
+		l.next()
 	}
 	l.push(Decimal)
 	return lexAny
