@@ -10,7 +10,7 @@ import (
 
 func TestParseFile(t *testing.T) {
 	t.Skip()
-	b, err := ioutil.ReadFile("..\\test.io")
+	b, err := ioutil.ReadFile("../test.io")
 	if err != nil {
 		fmt.Println(err)
 	}

@@ -7,7 +7,7 @@ import (
 )
 
 func TestLexFile(t *testing.T) {
-	b, err := ioutil.ReadFile("..\\test.io")
+	b, err := ioutil.ReadFile("../test.io")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -24,40 +24,58 @@ func TestLexIdentifier(t *testing.T) {
 
 	for _, v := range b {
 		for _, m := range Lex(v).Tokens {
-			if m.Type.String() != "Identifier" {
+			if m.Type != Identifier {
 				fmt.Println(m, len(m.Value))
 				t.Fail()
-			} else {
-				fmt.Println(m, len(m.Value))
 			}
 		}
 	}
 }
 
 func TestLexQuote(t *testing.T) {
-	t.Skip()
 	b := [][]byte{
+		// monoquotes
 		[]byte(`'apostrophe quotes'`),
 		[]byte(`"monoquote"`),
 		[]byte(`"monoquote with whitespace and
 		newlines"`),
+		[]byte(`'quote with operators _=-=-()'`),
+
+		// small quote
+		[]byte(`"p"`),
+
+		// triples
 		[]byte(`"""triplequote"""`),
 		[]byte(`"""triplequote with
 		newline and
 		whitespace characters"""`),
+
 		// escaped
+		[]byte(`"\'"`),
+		[]byte(`'\"'`),
 		[]byte(`"\""`),
 		[]byte(`"\"\"\""`),
+		[]byte(`"\r"`),
+		[]byte(`"\n\t"`),
+		[]byte(`"\r\f\""`),
+		[]byte(`"""\r\f"""`),
+
+		// empty
 		[]byte(`""`),
 		[]byte(`""""""`),
+
+		// []byte(`"""triquote with missing end quotes""`),
+		// []byte(`"monoquote with trailing operator",`),
 	}
 
 	for _, v := range b {
 		for _, m := range Lex(v).Tokens {
-			if g := m.Type.String(); g != "MonoQuote" || g != "TriQuote" {
-				t.Fail()
-			} else {
+			switch m.Type {
+			case TriQuote, MonoQuote:
+				continue
+			default:
 				fmt.Println(m, len(m.Value))
+				t.Fail()
 			}
 		}
 	}
@@ -67,13 +85,15 @@ func TestLexComment(t *testing.T) {
 	b := [][]byte{
 		[]byte(`/*star
 		* comment
-		 yeah*/`),
+		 with newlines*/`),
 		[]byte("//singlecomment"),
 		[]byte("#hashcomment"),
 	}
 	for _, v := range b {
-		for _, m := range Lex(v).Tokens {
-			if m.Type.String() != "Comment" {
+		k := Lex(v).Tokens
+		for _, m := range k {
+			if m.Type != Comment || len(k) > 1 {
+				fmt.Println(m, len(m.Value))
 				t.Fail()
 			}
 		}
@@ -93,8 +113,10 @@ func TestLexHex(t *testing.T) {
 	// }
 
 	for _, v := range b {
-		for _, m := range Lex(v).Tokens {
-			if m.Type.String() != "HexNumber" {
+		k := Lex(v).Tokens
+		for _, m := range k {
+			if m.Type != HexNumber || len(k) > 1 {
+				fmt.Println(m, len(m.Value))
 				t.Fail()
 			}
 		}
@@ -112,8 +134,10 @@ func TestLexDecimal(t *testing.T) {
 	}
 
 	for _, v := range b {
-		for _, m := range Lex(v).Tokens {
-			if m.Type.String() != "Decimal" {
+		k := Lex(v).Tokens
+		for _, m := range k {
+			if m.Type != Decimal || len(k) > 1 {
+				fmt.Println(m, len(m.Value))
 				t.Fail()
 			}
 		}
