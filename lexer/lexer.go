@@ -109,10 +109,7 @@ func lexAny(l *Lexer) stateFn {
 		}
 		l.push(Operator)
 		return lexAny
-	case r == '"', r == '\'':
-		// advance until another '"' is found
-		for ; l.peek() == '"' || l.peek() == '\''; l.next() {
-		}
+	case isQuoteChar(r):
 		return lexQuote
 	// this is ugly
 	case isSeparator(r), r == '\r', r == '\n':
@@ -182,27 +179,54 @@ func lexIdentifier(l *Lexer) stateFn {
 	return lexDecimal
 }
 
+// first quoteChar has been consumed
 func lexQuote(l *Lexer) stateFn {
 	for {
 		switch r := l.next(); {
+		// the next character should be an escaped one
+		case r == '\\':
+			// if l.next() is a character literal, don't follow the escape logic
+			if isEscapeDelim(l.next()) {
+				return lexQuote
+			}
+			// if it wasn't a characterDelim, backup so we're on the correct char
+			l.backup()
+			// backup so we're currently on the '\' char
+			l.backup()
+			// skip over the \ (remove it from the input entirely)
+			l.input = append(l.input[:l.position], l.input[l.position+1:]...)
+			return lexAny
+		// r is the next '"' found
 		case r == '"':
-			// check for TriQuote
-			if l.next() == '"' && l.next() == '"' {
-				l.push(TriQuote)
+			// for some reason, a trailing operator gets included in the MonoQuote
+			// by saving the starting position, we can prevent this from happeninng
+			startingPos := l.position
+			if l.next() == '"' {
+				// we have found the first part of a TriQuote, now we just need to skip the inside part
+				for !isQuoteChar(l.peek()) {
+					l.next()
+				}
+				if l.next() == '"' && l.next() == '"' && l.next() == '"' {
+					l.push(TriQuote)
+					return lexAny
+				} else {
+					fmt.Println("End quotes missing from TriQuote")
+				}
+			} else if l.next() == '\'' {
+				l.push(MonoQuote)
+				return lexAny
+			} else {
+				l.position = startingPos
+				l.push(MonoQuote)
 				return lexAny
 			}
-			//should we be backing up here?
-			l.backup()
-			l.push(MonoQuote)
-			return lexAny
 		case r == '\'':
 			l.push(MonoQuote)
 			return lexAny
+		case r == eof:
+			l.push(MonoQuote)
+			return nil
 		}
-		//here's why this didn't work: if you put the variable in the beginning of the for loop, it captures it so you just keep switching on the same rune over and over again
-		// for l.next() != '"' {
-		// 	l.next()
-		// }
 	}
 }
 
@@ -274,4 +298,11 @@ func isHexChar(c rune) bool {
 
 func isDecChar(c rune) bool {
 	return unicode.IsDigit(c) || c == 'e' || c == '.' || c == '-'
+}
+func isQuoteChar(c rune) bool {
+	return c == '"' || c == '\''
+}
+
+func isEscapeDelim(c rune) bool {
+	return c == 'n' || c == 'f' || c == 't' || c == 'r' || c == 'v'
 }
