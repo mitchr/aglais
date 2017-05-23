@@ -20,6 +20,7 @@ func TestLexFile(t *testing.T) {
 func TestLexIdentifier(t *testing.T) {
 	b := [][]byte{
 		[]byte(`o setSlot`),
+		[]byte(`name_with_underscores`),
 	}
 
 	for _, v := range b {
