@@ -137,13 +137,13 @@ func lexAny(l *Lexer) stateFn {
 		case p == '*':
 			return lexStarComment
 		}
-	case r == '0':
-		if c := l.next(); c == 'x' || c == 'X' {
-			return lexHex
+	case unicode.IsDigit(r):
+		if r == '0' {
+			if c := l.next(); c == 'x' || c == 'X' {
+				return lexHex
+			}
 		}
 		l.backup()
-		fallthrough
-	case unicode.IsDigit(r):
 		return lexDecimal
 	case r == ',':
 		l.push(Comma)
