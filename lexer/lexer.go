@@ -180,10 +180,10 @@ func lexIdentifier(l *Lexer) stateFn {
 
 // first quoteChar has been consumed
 func lexQuote(l *Lexer) stateFn {
-	for {
-		switch r := l.next(); {
-		// the next character should be an escaped one
-		case r == '\\':
+	for r := l.next(); r != eof; r = l.next() {
+		switch r {
+		// the next character is an escaped one
+		case '\\':
 			// if l.next() is a character literal, don't follow the escape logic
 			if isEscapeDelim(l.next()) {
 				return lexQuote
@@ -196,7 +196,7 @@ func lexQuote(l *Lexer) stateFn {
 			l.input = append(l.input[:l.position], l.input[l.position+1:]...)
 			return lexAny
 		// r is the next '"' found
-		case r == '"':
+		case '"':
 			// for some reason, a trailing operator gets included in the MonoQuote
 			// by saving the starting position, we can prevent this from happeninng
 			startingPos := l.position
@@ -219,29 +219,26 @@ func lexQuote(l *Lexer) stateFn {
 				l.push(MonoQuote)
 				return lexAny
 			}
-		case r == '\'':
+		case '\'':
 			l.push(MonoQuote)
 			return lexAny
-		case r == eof:
-			l.push(MonoQuote)
-			return nil
 		}
 	}
+	l.push(MonoQuote)
+	return nil
 }
 
 // terminator is included in the Comment token
 func lexComment(l *Lexer) stateFn {
-	for {
-		switch l.next() {
-		case eof:
-			// push whatever we have before exiting
-			l.push(Comment)
-			return nil
-		case '\n':
+	for r := l.next(); r != eof; r = l.next() {
+		if r == '\n' {
 			l.push(Comment)
 			return lexAny
 		}
 	}
+	// push whatever we have before exiting
+	l.push(Comment)
+	return nil
 }
 
 func lexStarComment(l *Lexer) stateFn {
