@@ -1,7 +1,7 @@
 package lexer
 
 import (
-	"fmt"
+	"log"
 	"unicode"
 )
 
@@ -124,7 +124,6 @@ func lexAny(l *Lexer) stateFn {
 		}
 		return lexAny
 	case isWhitespace(r):
-		fmt.Println("Found whitespace!")
 		l.next()
 		return lexAny
 	case r == '#', r == '/':
@@ -155,12 +154,12 @@ func lexAny(l *Lexer) stateFn {
 		l.push(Close)
 		return lexAny
 	case r == eof:
-		// fmt.Println("EOF reached!")
 		return nil
 	default:
-		panic(fmt.Sprintf("Unrecognized character: %s\n", string(r)))
+		log.Fatalf("Unrecognized character: %s\n", string(r))
 	}
-	panic(fmt.Sprintf("Don't know what went wrong!\nlast rune scanned: %s\nposition:%v", string(l.input[l.position]), l.input[l.start:l.position]))
+	log.Fatalf("Don't know what went wrong!\nlast rune scanned: %s\nposition:%v", string(l.input[l.position]), l.input[l.start:l.position])
+	return nil
 }
 
 // has already captured the first character
@@ -210,7 +209,7 @@ func lexQuote(l *Lexer) stateFn {
 					l.push(TriQuote)
 					return lexAny
 				} else {
-					fmt.Println("End quotes missing from TriQuote")
+					log.Fatal("End quotes missing from TriQuote")
 				}
 			} else if l.next() == '\'' {
 				l.push(MonoQuote)
