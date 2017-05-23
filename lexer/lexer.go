@@ -101,7 +101,6 @@ func lexAny(l *Lexer) stateFn {
 			return lexHex
 		}
 		l.backup()
-		l.backup()
 		return lexIdentifier
 	case isOperator(r):
 		if r == '.' {
