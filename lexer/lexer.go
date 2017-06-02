@@ -57,7 +57,8 @@ func (l *Lexer) next() rune {
 	if l.position == len(l.input) {
 		return eof
 	}
-	r := rune(l.input[l.position:][0])
+
+	r := rune(l.input[l.position])
 	l.position++
 	return r
 }
