@@ -97,9 +97,11 @@ func lexAny(l *Lexer) stateFn {
 	switch r := l.next(); {
 	case isAlphaNumeric(r):
 		// check for hexcharacters
-		if p := l.next(); (r == '0' && (p == 'x' || p == 'X')) && isHexChar(l.peek()) {
+		hex := l.next()
+		if r == '0' && (hex == 'x' || hex == 'X') && isHexChar(l.peek()) {
 			return lexHex
 		}
+
 		l.backup()
 		return lexIdentifier
 	case isOperator(r):
