@@ -9,11 +9,18 @@ import (
 )
 
 func TestParseFile(t *testing.T) {
-	t.Skip()
-	b, err := ioutil.ReadFile("../test.io")
-	if err != nil {
-		fmt.Println(err)
+	files := []string{
+		// "../test.io",
+		"../fizzbuzz.io",
+		// "../grammar",
 	}
 
-	fmt.Println(Parse(lexer.Lex(b)))
+	for _, v := range files {
+		b, err := ioutil.ReadFile(v)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		fmt.Println(Parse(lexer.Lex(b)))
+	}
 }

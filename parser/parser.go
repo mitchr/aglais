@@ -1,115 +1,102 @@
 package parser
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/Mitchell-Riley/aglais/lexer"
 )
 
-type TokenType int
+var eof = lexer.Token{Type: -1}
 
-//go:generate stringer -type=TokenType
-const (
-	expression TokenType = iota
-	message
-	arguments
-	argument
-	symbol
-)
-
-type Node struct {
-	Type TokenType
-	// Val  string
-
-	uToken lexer.Token //underlying Token type
-}
-
-type tree struct {
-	Nodes []Node
-}
-
-type Parser struct {
-	Tokens []lexer.Token
+type parser struct {
+	lexer *lexer.Lexer
 
 	current  lexer.Token
 	position int
-	Buff     []Node // unexport this when finished debugging
-	state    stateFn
 }
 
-type stateFn func(*Parser) stateFn
-
-func (p *Parser) next() lexer.Token {
-	if p.position == len(p.Tokens) {
-		return lexer.Token{Type: -1}
+func (p *parser) next() lexer.Token {
+	if p.position == len(p.lexer.Tokens) {
+		p.current = eof
+		return eof
 	}
 
-	p.current = p.Tokens[p.position:][0]
+	p.current = p.lexer.Tokens[p.position]
 	p.position++
 	return p.current
 }
 
-func (p *Parser) push(t TokenType) {
-	p.Buff = append(p.Buff, Node{t, lexer.Token{p.current.Type, p.current.Value}})
-}
-
-func Parse(l *lexer.Lexer) *Parser {
-	p := &Parser{
-		Tokens: l.Tokens,
-		// start with the first token
-		current:  l.Tokens[0],
-		position: 1,
-		state:    parseAny,
+func Parse(l *lexer.Lexer) *parser {
+	p := &parser{
+		lexer: l,
 	}
 
-	for p.state != nil {
-		p.state = p.state(p)
-	}
+	p.next()
+	p.expression()
 
 	return p
 }
 
-func parseAny(p *Parser) stateFn {
-	switch t := p.next(); t.Type {
-	case lexer.Identifier, lexer.Operator, lexer.MonoQuote, lexer.TriQuote, lexer.Decimal, lexer.HexNumber:
-		return parseExpression
-	case lexer.Open:
-		return parseArguments
-	case lexer.Comment:
-		return parseAny
-	case -1:
-		return nil
-	default:
-		fmt.Println("Unknown token:", t)
-		return parseAny
-	}
-}
-
-func parseExpression(p *Parser) stateFn {
-	// for {
-	// 	switch p.next().Type {
-	// 	case lexer.Comment, lexer.Terminator:
-	// 		p.push(expression)
-	// 		return parseAny
-	// 	}
-	// }
-
-	for t := p.next().Type; t != lexer.Comment || t != lexer.Terminator; {
+func (p *parser) accept(tok lexer.TokenType) bool {
+	if p.current.Type == tok {
 		p.next()
+		return true
 	}
-	p.push(expression)
-	return parseAny
+	return false
 }
 
-func parseArguments(p *Parser) stateFn {
-	p.push(arguments)
-	return parseAny
+func (p *parser) expect(tok lexer.TokenType) bool {
+	if p.accept(tok) {
+		return true
+	}
+	log.Fatalf("unexpected token: %s", tok)
+	return false
 }
 
-func parseArgument(p *Parser) stateFn {
-	switch p.next().Type {
-	case lexer.Comment:
-		return parseExpression
+// expression ::= { symbol [arguments] | [Terminator | Comment] }
+func (p *parser) expression() {
+	for {
+		if isSymbol(p.current.Type) {
+			// check if we are at eof?
+			p.next()
+			if p.accept(lexer.Open) {
+				p.arguments()
+			}
+		} else if p.accept(lexer.Terminator) || p.accept(lexer.Comment) {
+			continue
+		} else {
+			break
+		}
 	}
-	return parseAny
+}
+
+// arguments ::= Open [expression [ { Comma expression } ] ] Close
+// Open Close
+// Open expression Close
+// Open expression {Comma expression} Close
+func (p *parser) arguments() {
+	// no expression inside parens
+	if p.accept(lexer.Close) {
+		return
+	} else if isSymbol(p.current.Type) {
+		p.expression()
+		for p.accept(lexer.Comma) {
+			p.expression()
+		}
+		// if p.accept(lexer.Comma) {
+		// 	for {
+		// 		p.expression()
+		// 		if !p.accept(lexer.Comma) {
+		// 			break
+		// 		}
+		// 	}
+		// }
+		p.expect(lexer.Close)
+	} else {
+		log.Fatal("unbalanced parens?")
+	}
+}
+
+func isSymbol(t lexer.TokenType) bool {
+	return t == lexer.Identifier || t == lexer.HexNumber || t == lexer.Decimal || t == lexer.Operator || t == lexer.MonoQuote || t == lexer.TriQuote || t == lexer.Terminator
 }
