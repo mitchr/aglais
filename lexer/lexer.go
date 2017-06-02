@@ -136,6 +136,10 @@ func lexAny(l *Lexer) stateFn {
 			return lexComment
 		case p == '*':
 			return lexStarComment
+		default:
+			// might want to backup and return lexAny depending on
+			// the usefulness of the '/' operator by itself
+			log.Fatal("Ill-formed comment")
 		}
 	case unicode.IsDigit(r):
 		if r == '0' {
