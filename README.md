@@ -9,6 +9,14 @@ However, this is not a direct translation. I am also using this opportunity to l
 ## Installation
 `go get github.com/mitchell-riley/aglais`
 
-## Thanks
-* Jonathan Boyett for his inspiring [europa](https://github.com/saysjonathan/europa), a project sharing a similar objective to mine.
-* Rob Pike for his ingenious [concurrent lexer](https://www.youtube.com/watch?v=HxaD_trXwRE) design.
+## Resources
+* Jonathan Boyett's inspiring [europa](https://github.com/saysjonathan/europa)
+* Rob Pike's [concurrent lexer](https://www.youtube.com/watch?v=HxaD_trXwRE) design
+* Christoph Zenger's [course notes on grammar manipulation](http://lampwww.epfl.ch/teaching/archive/compilation-ssc/2000/part4/parsing/node3.html#SECTION00030000000000000000)
+* Context free grammar checkers:
+    1. http://smlweb.cpsc.ucalgary.ca/start.html
+    2. http://mdaines.github.io/grammophone/
+* Recursive descent parsers:
+    1. http://cogitolearning.co.uk/?p=573
+    2. https://en.wikipedia.org/wiki/Recursive_descent_parser#C_implementation
+    3. http://www.cs.cornell.edu/courses/cs412/2008sp/lectures/lec07.pdf
