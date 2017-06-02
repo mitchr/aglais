@@ -36,11 +36,10 @@ func TestLexIdentifier(t *testing.T) {
 func TestLexQuote(t *testing.T) {
 	b := [][]byte{
 		// monoquotes
-		[]byte(`'apostrophe quotes'`),
 		[]byte(`"monoquote"`),
 		[]byte(`"monoquote with whitespace and
 		newlines"`),
-		[]byte(`'quote with operators _=-=-()'`),
+		[]byte(`"quote with operators _=-=-()"`),
 
 		// small quote
 		[]byte(`"p"`),

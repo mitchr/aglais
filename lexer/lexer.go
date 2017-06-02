@@ -178,6 +178,7 @@ func lexIdentifier(l *Lexer) stateFn {
 }
 
 // first quoteChar has been consumed
+// this functions still sucks oh my lord
 func lexQuote(l *Lexer) stateFn {
 	for r := l.next(); r != eof; r = l.next() {
 		switch r {
@@ -196,9 +197,6 @@ func lexQuote(l *Lexer) stateFn {
 			return lexAny
 		// r is the next '"' found
 		case '"':
-			// for some reason, a trailing operator gets included in the MonoQuote
-			// by saving the starting position, we can prevent this from happeninng
-			startingPos := l.position
 			if l.next() == '"' {
 				// we have found the first part of a TriQuote, now we just need to skip the inside part
 				for !isQuoteChar(l.peek()) {
@@ -210,17 +208,11 @@ func lexQuote(l *Lexer) stateFn {
 				} else {
 					log.Fatal("End quotes missing from TriQuote")
 				}
-			} else if l.next() == '\'' {
-				l.push(MonoQuote)
-				return lexAny
 			} else {
-				l.position = startingPos
+				l.backup()
 				l.push(MonoQuote)
 				return lexAny
 			}
-		case '\'':
-			l.push(MonoQuote)
-			return lexAny
 		}
 	}
 	l.push(MonoQuote)
