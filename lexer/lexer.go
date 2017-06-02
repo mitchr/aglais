@@ -64,12 +64,11 @@ func (l *Lexer) next() rune {
 
 //check if moving the lexer backwards will break the EOF condition
 func (l *Lexer) peek() rune {
-	r := l.next()
-
 	if l.position == len(l.input) {
 		return eof
 	}
 
+	r := l.next()
 	l.backup()
 	return r
 }

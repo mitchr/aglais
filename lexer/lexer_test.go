@@ -23,9 +23,22 @@ func TestLexIdentifier(t *testing.T) {
 		[]byte(`name_with_underscores`),
 	}
 
+	f := [][]byte{
+	// []byte(`j(`),
+	}
+
 	for _, v := range b {
 		for _, m := range Lex(v).Tokens {
 			if m.Type != Identifier {
+				fmt.Println(m, len(m.Value))
+				t.Fail()
+			}
+		}
+	}
+
+	for _, v := range f {
+		for _, m := range Lex(v).Tokens {
+			if m.Type == Identifier {
 				fmt.Println(m, len(m.Value))
 				t.Fail()
 			}
