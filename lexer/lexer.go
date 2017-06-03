@@ -215,7 +215,6 @@ func lexQuote(l *Lexer) stateFn {
 					log.Fatal("End quotes missing from TriQuote")
 				}
 			} else {
-				l.backup()
 				l.push(MonoQuote)
 				return lexAny
 			}

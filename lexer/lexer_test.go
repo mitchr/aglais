@@ -56,6 +56,7 @@ func TestLexQuote(t *testing.T) {
 
 		// small quote
 		[]byte(`"p"`),
+		[]byte(`"'"`),
 
 		// triples
 		[]byte(`"""triplequote"""`),
@@ -65,7 +66,6 @@ func TestLexQuote(t *testing.T) {
 
 		// escaped
 		[]byte(`"\'"`),
-		[]byte(`'\"'`),
 		[]byte(`"\""`),
 		[]byte(`"\"\"\""`),
 		[]byte(`"\r"`),
@@ -84,7 +84,7 @@ func TestLexQuote(t *testing.T) {
 	for _, v := range b {
 		for _, m := range Lex(v).Tokens {
 			switch m.Type {
-			case TriQuote, MonoQuote:
+			case MonoQuote, TriQuote:
 				continue
 			default:
 				fmt.Println(m, len(m.Value))
